@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurante Universitário - UVA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --verde-governo: #009a44;
+            --verde-claro: #e6f2e9;
+            --verde-medio: #b3d9bf;
+            --branco: #ffffff;
+            --cinza-claro: #f8f9fa;
+            --texto-escuro: #1a3e1f;
+        }
+        
+        body {
+            background-color: var(--branco);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .header-custom {
+            background-color: var(--verde-governo);
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .card {
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+            background-color: var(--verde-claro);
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            border-radius: 10px 10px 0 0 !important;
+            font-weight: 600;
+            font-size: 1.1rem;
+            background-color: var(--verde-governo) !important;
+            color: var(--branco);
+        }
+        
+        .btn-option {
+            background-color: var(--branco);
+            border: none;
+            color: var(--texto-escuro);
+            padding: 15px;
+            margin-bottom: 10px;
+            text-align: left;
+            transition: all 0.3s;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            border-left: 4px solid var(--verde-governo);
+        }
+        
+        .btn-option:hover {
+            background-color: var(--verde-claro);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn-option i {
+            margin-right: 10px;
+            font-size: 1.3rem;
+            color: var(--verde-governo);
+        }
+        
+        #saldo {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--texto-escuro);
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            border-radius: 8px;
+            background-color: var(--verde-governo);
+            color: white;
+        }
+        
+        .table {
+            margin-bottom: 0;
+            background-color: var(--branco);
+        }
+        
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: var(--texto-escuro);
+            background-color: var(--verde-claro);
+        }
+        
+        .table td {
+            border-top: 1px solid var(--verde-medio);
+        }
+        
+        .text-success {
+            color: var(--verde-governo) !important;
+            font-weight: 600;
+        }
+        
+        .text-danger {
+            color: #e53935 !important;
+            font-weight: 600;
+        }
+        
+        .modal-content {
+            border-radius: 12px;
+            border: 1px solid var(--verde-medio);
+        }
+        
+        .form-control {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--verde-medio);
+        }
+        
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(0, 154, 68, 0.25);
+            border-color: var(--verde-governo);
+        }
+        
+        .btn-primary {
+            background-color: var(--verde-governo);
+            border-color: var(--verde-governo);
+        }
+        
+        .btn-primary:hover {
+            background-color: #007d38;
+            border-color: #007d38;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--verde-governo);
+            font-weight: bold;
+            border-bottom: 3px solid var(--verde-governo);
+        }
+        
+        .nav-tabs .nav-link {
+            color: var(--verde-governo);
+        }
+        
+        .alert-info {
+            background-color: var(--verde-claro);
+            border-color: var(--verde-medio);
+            color: var(--texto-escuro);
+        }
+        
+        .valor-rapido {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .valor-rapido .btn {
+            flex: 1 0 calc(33.333% - 10px);
+            min-width: 100px;
+        }
+        
+        /* Estilos melhorados para o QR Code */
+        .qr-code-container {
+            border: 1px solid var(--verde-medio);
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+            margin: 0 auto 20px;
+            max-width: 300px;
+            text-align: center;
+        }
+        
+        #qrCodeRecarga {
+            margin: 0 auto;
+            display: inline-block;
+        }
+        
+        #qrCodeRecarga canvas, #qrCodeRecarga img {
+            margin: 0 auto;
+            display: block;
+        }
+        
+        /* Estilos para a confirmação PIX */
+        .pix-confirmacao {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1060;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .pix-box {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .pix-box h4 {
+            color: var(--verde-governo);
+            margin-bottom: 20px;
+        }
+        
+        .valor-confirmacao {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--verde-governo);
+            margin: 20px 0;
+        }
+        
+        .btn-confirmacao {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .btn-confirmacao .btn {
+            padding: 10px 20px;
+            min-width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header-custom text-white">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <img src="logo-uva.png" alt="Logo UVA" style="height: 50px;" class="me-3">
+                    <h1 class="h5 mb-0">Restaurante Universitário</h1>
+                </div>
+                <div id="dataHora" class="h6 mb-0"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container my-4">
+        <!-- Balance Card -->
+        <div class="card shadow">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Saldo Atual</span>
+                <i class="bi bi-wallet2"></i>
+            </div>
+            <div class="card-body text-center py-4">
+                <h2 class="card-title">R$ <span id="saldo">0,00</span></h2>
+            </div>
+        </div>
+
+        <!-- Options Grid -->
+        <div class="row row-cols-1 row-cols-md-2 g-3 mb-4">
+            <!-- Recarga Unificada -->
+            <div class="col">
+                <button class="btn btn-option w-100" data-bs-toggle="modal" data-bs-target="#modalRecarga">
+                    <i class="bi bi-cash-stack"></i> Recarregar Saldo
+                </button>
+            </div>
+            
+            <!-- Transfer -->
+            <div class="col">
+                <button class="btn btn-option w-100" data-bs-toggle="modal" data-bs-target="#modalTransferir">
+                    <i class="bi bi-arrow-left-right"></i> Transferir Créditos
+                </button>
+            </div>
+            
+            <!-- Ticket -->
+            <div class="col">
+                <button class="btn btn-option w-100" data-bs-toggle="modal" data-bs-target="#modalTicket">
+                    <i class="bi bi-ticket-perforated"></i> Gerar Ticket
+                </button>
+            </div>
+            
+            <!-- Extrato -->
+            <div class="col">
+                <button class="btn btn-option w-100" data-bs-toggle="modal" data-bs-target="#modalExtrato">
+                    <i class="bi bi-receipt"></i> Ver Extrato Completo
+                </button>
+            </div>
+        </div>
+
+        <!-- History -->
+        <div class="card shadow">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Últimas Movimentações</span>
+                <i class="bi bi-clock-history"></i>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Descrição</th>
+                                <th class="text-end">Valor (R$)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historico">
+                            <!-- Will be filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Recarga Modal -->
+    <div class="modal fade" id="modalRecarga" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Recarregar Saldo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs mb-4" id="recargaTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="pix-tab" data-bs-toggle="tab" data-bs-target="#pix-tab-pane" type="button" role="tab">PIX</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="cartao-tab" data-bs-toggle="tab" data-bs-target="#cartao-tab-pane" type="button" role="tab">Cartão</button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="recargaTabsContent">
+                        <!-- PIX Tab -->
+                        <div class="tab-pane fade show active" id="pix-tab-pane" role="tabpanel" tabindex="0">
+                            <div class="mb-3">
+                                <label class="form-label">Valor da Recarga (R$)</label>
+                                <input type="number" id="valorPix" class="form-control" min="1" step="0.01" placeholder="0,00" required>
+                            </div>
+                            
+                            <!-- Valores rápidos -->
+                            <div class="valor-rapido mb-3">
+                                <button class="btn btn-outline-secondary btn-valor-rapido" data-valor="10">R$ 10,00</button>
+                                <button class="btn btn-outline-secondary btn-valor-rapido" data-valor="20">R$ 20,00</button>
+                                <button class="btn btn-outline-secondary btn-valor-rapido" data-valor="50">R$ 50,00</button>
+                            </div>
+                            
+                            <!-- Área do QR Code Dinâmico (Centralizado) -->
+                            <div class="qr-code-container" id="qrCodeContainer" style="display: none;">
+                                <div class="d-flex justify-content-center">
+                                    <div id="qrCodeRecarga" class="text-center"></div>
+                                </div>
+                                <p class="mt-2 mb-1 text-center"><strong>Valor: R$ <span id="valorExibido">0,00</span></strong></p>
+                                <p class="small text-muted mb-2 text-center">Escaneie este QR Code com seu app bancário</p>
+                                <div class="d-flex justify-content-center">
+                                    <button id="btnSimularPixRecarga" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-phone"></i> Simular Teste
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i> Chave PIX: <strong>restaurante@uva.edu.br</strong>
+                            </div>
+                        </div>
+                        
+                        <!-- Cartão Tab -->
+                        <div class="tab-pane fade" id="cartao-tab-pane" role="tabpanel" tabindex="0">
+                            <form id="formCartao">
+                                <div class="mb-3">
+                                    <label class="form-label">Número do Cartão</label>
+                                    <input type="text" class="form-control" value="4111 1111 1111 1111" required>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Validade (MM/AA)</label>
+                                        <input type="text" class="form-control" placeholder="MM/AA" value="12/25" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">CVV</label>
+                                        <input type="text" class="form-control" value="123" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Nome no Cartão</label>
+                                    <input type="text" class="form-control" value="FULANO DA SILVA" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Valor da Recarga (R$)</label>
+                                    <input type="number" id="valorCartao" class="form-control" min="1" step="0.01" placeholder="0,00" required>
+                                </div>
+                                
+                                <!-- Valores rápidos para cartão -->
+                                <div class="valor-rapido mb-3">
+                                    <button class="btn btn-outline-secondary btn-valor-rapido" data-valor="10">R$ 10,00</button>
+                                    <button class="btn btn-outline-secondary btn-valor-rapido" data-valor="20">R$ 20,00</button>
+                                    <button class="btn btn-outline-secondary btn-valor-rapido" data-valor="50">R$ 50,00</button>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary w-100 py-2">
+                                    <i class="bi bi-check-circle me-2"></i> Confirmar Pagamento
+                                </button>
+                            </form>
+                            <div class="mt-3 text-muted small">
+                                <i class="bi bi-info-circle"></i> Use cartão de teste: 4111 1111 1111 1111 | Val: 12/25 | CVV: 123
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button id="btnGerarQrCode" class="btn btn-primary">
+                        <i class="bi bi-qr-code me-2"></i> Gerar QR Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmação de Recarga PIX -->
+    <div id="confirmacaoPix" class="pix-confirmacao">
+        <div class="pix-box">
+            <h4>Confirmar Recarga</h4>
+            <div class="alert alert-success">
+                <p>Restaurante Universitário UVA</p>
+                <div class="valor-confirmacao">R$ <span id="valorConfirmacao">0,00</span></div>
+            </div>
+            
+            <div class="btn-confirmacao">
+                <button id="btnCancelarPix" class="btn btn-secondary">
+                    <i class="bi bi-x-lg me-2"></i> Cancelar
+                </button>
+                <button id="btnConfirmarPix" class="btn btn-success">
+                    <i class="bi bi-check-lg me-2"></i> Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transfer Modal -->
+    <div class="modal fade" id="modalTransferir" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Transferir Créditos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Matrícula do Destinatário</label>
+                        <input type="text" id="matriculaDestino" class="form-control" placeholder="Digite a matrícula (8 dígitos)" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Valor (R$)</label>
+                        <input type="number" id="valorTransferencia" class="form-control" min="0.01" step="0.01" placeholder="0,00" required>
+                    </div>
+                    <button id="btnTransferir" class="btn btn-primary w-100 py-2">
+                        <i class="bi bi-check-circle me-2"></i> Confirmar Transferência
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ticket Modal -->
+    <div class="modal fade" id="modalTicket" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ticket de Refeição</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div id="qrCode" class="mb-3"></div>
+                    <p class="mb-3">Apresente este QR Code no restaurante</p>
+                    <div class="alert alert-info">
+                        <i class="bi bi-clock me-2"></i> Válido por 1 hora | Valor: R$ 2,50
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Extrato Modal -->
+    <div class="modal fade" id="modalExtrato" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Extrato Completo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Descrição</th>
+                                    <th class="text-end">Valor</th>
+                                    <th class="text-end">Saldo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="extratoCompleto">
+                                <!-- Will be filled by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary">
+                        <i class="bi bi-download me-2"></i> Exportar PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast align-items-center" id="toastNotificacao" role="alert">
+        <div class="d-flex">
+            <div class="toast-body"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        // Variáveis globais
+        let saldoAtual = 0.00;
+        let historico = [
+            {
+                data: new Date().toLocaleString('pt-BR'),
+                descricao: "Saldo inicial",
+                valor: 0.00,
+                tipo: "entrada"
+            }
+        ];
+        let valorAtualPix = 0;
+
+        // Elementos do DOM
+        const elementos = {
+            saldo: document.getElementById('saldo'),
+            historico: document.getElementById('historico'),
+            qrCodeRecarga: document.getElementById('qrCodeRecarga'),
+            qrCodeContainer: document.getElementById('qrCodeContainer'),
+            valorExibido: document.getElementById('valorExibido'),
+            btnSimularPixRecarga: document.getElementById('btnSimularPixRecarga'),
+            confirmacaoPix: document.getElementById('confirmacaoPix'),
+            valorConfirmacao: document.getElementById('valorConfirmacao'),
+            btnConfirmarPix: document.getElementById('btnConfirmarPix'),
+            btnCancelarPix: document.getElementById('btnCancelarPix'),
+            btnGerarQrCode: document.getElementById('btnGerarQrCode'),
+            formCartao: document.getElementById('formCartao'),
+            btnTransferir: document.getElementById('btnTransferir'),
+            toast: document.getElementById('toastNotificacao'),
+            extratoCompleto: document.getElementById('extratoCompleto'),
+            valorPix: document.getElementById('valorPix'),
+            valorCartao: document.getElementById('valorCartao')
+        };
+
+        // Função para mostrar notificação
+        function mostrarToast(mensagem, tipo = 'success') {
+            elementos.toast.querySelector('.toast-body').textContent = mensagem;
+            elementos.toast.className = `toast align-items-center bg-${tipo}`;
+            new bootstrap.Toast(elementos.toast).show();
+        }
+
+        // Função para atualizar a interface
+        function atualizarInterface() {
+            elementos.saldo.textContent = saldoAtual.toFixed(2).replace('.', ',');
+            
+            // Atualiza histórico recente
+            elementos.historico.innerHTML = historico.slice(0, 5).map(item => `
+                <tr>
+                    <td>${item.data}</td>
+                    <td>${item.descricao}</td>
+                    <td class="text-end ${item.tipo === 'entrada' ? 'text-success' : 'text-danger'}">
+                        ${item.tipo === 'entrada' ? '+' : '-'}${item.valor.toFixed(2).replace('.', ',')}
+                    </td>
+                </tr>
+            `).join('');
+            
+            // Atualiza extrato completo
+            if (elementos.extratoCompleto) {
+                let saldoAcumulado = 0;
+                elementos.extratoCompleto.innerHTML = historico.map(item => {
+                    saldoAcumulado = item.tipo === 'entrada' ? 
+                        saldoAcumulado + item.valor : 
+                        saldoAcumulado - item.valor;
+                    
+                    return `
+                        <tr>
+                            <td>${item.data}</td>
+                            <td>${item.descricao}</td>
+                            <td class="text-end ${item.tipo === 'entrada' ? 'text-success' : 'text-danger'}">
+                                ${item.tipo === 'entrada' ? '+' : '-'}${item.valor.toFixed(2).replace('.', ',')}
+                            </td>
+                            <td class="text-end">R$ ${saldoAcumulado.toFixed(2).replace('.', ',')}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Função para formatar data
+        function formatarData() {
+            const agora = new Date();
+            return agora.toLocaleString('pt-BR');
+        }
+
+        // Atualizar data e hora no header
+        function atualizarDataHora() {
+            const agora = new Date();
+            const options = {
+                weekday: 'long',
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            document.getElementById('dataHora').textContent = agora.toLocaleDateString('pt-BR', options);
+        }
+
+        // Atualizar QR Code de recarga
+        function atualizarQrCodeRecarga(valor) {
+            elementos.qrCodeRecarga.innerHTML = '';
+            valorAtualPix = valor;
+            if (valor > 0) {
+                elementos.qrCodeContainer.style.display = 'block';
+                elementos.valorExibido.textContent = valor.toFixed(2).replace('.', ',');
+                new QRCode(elementos.qrCodeRecarga, {
+                    text: `PIXUVA:${valor.toFixed(2)}:${Date.now()}`,
+                    width: 180,
+                    height: 180,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff"
+                });
+            } else {
+                elementos.qrCodeContainer.style.display = 'none';
+            }
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Valores rápidos
+            document.querySelectorAll('.btn-valor-rapido').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const valor = parseFloat(this.getAttribute('data-valor'));
+                    const activeTab = document.querySelector('#recargaTabs .nav-link.active').id;
+                    
+                    if (activeTab === 'pix-tab') {
+                        elementos.valorPix.value = valor;
+                    } else {
+                        elementos.valorCartao.value = valor;
+                    }
+                });
+            });
+            
+            // Gerar QR Code
+            elementos.btnGerarQrCode.addEventListener('click', function() {
+                const valor = parseFloat(elementos.valorPix.value);
+                
+                if (isNaN(valor) || valor <= 0) {
+                    mostrarToast("Digite um valor válido primeiro!", "danger");
+                    return;
+                }
+                
+                atualizarQrCodeRecarga(valor);
+            });
+            
+            // Simular PIX
+            elementos.btnSimularPixRecarga.addEventListener('click', function() {
+                const valor = parseFloat(elementos.valorPix.value);
+                
+                if (isNaN(valor) || valor <= 0) {
+                    mostrarToast("Digite um valor válido primeiro!", "danger");
+                    return;
+                }
+                
+                // Fecha o modal de recarga
+                bootstrap.Modal.getInstance(document.getElementById('modalRecarga')).hide();
+                
+                // Mostra a confirmação com o valor
+                elementos.valorConfirmacao.textContent = valor.toFixed(2).replace('.', ',');
+                elementos.confirmacaoPix.style.display = 'flex';
+            });
+            
+            // Confirmar PIX
+            elementos.btnConfirmarPix.addEventListener('click', function() {
+                const valor = parseFloat(elementos.valorPix.value);
+                
+                if (isNaN(valor) || valor <= 0) {
+                    mostrarToast("Valor inválido!", "danger");
+                    return;
+                }
+
+                // Atualiza saldo e histórico
+                saldoAtual += valor;
+                historico.unshift({
+                    data: formatarData(),
+                    descricao: "Recarga via PIX",
+                    valor: valor,
+                    tipo: "entrada"
+                });
+
+                mostrarToast(`Recarga de R$ ${valor.toFixed(2).replace('.', ',')} confirmada!`, "success");
+                atualizarInterface();
+                
+                // Fecha a confirmação
+                elementos.confirmacaoPix.style.display = 'none';
+                
+                // Limpa os campos
+                elementos.valorPix.value = '';
+                elementos.qrCodeRecarga.innerHTML = '';
+                elementos.qrCodeContainer.style.display = 'none';
+            });
+            
+            // Cancelar PIX
+            elementos.btnCancelarPix.addEventListener('click', function() {
+                // Fecha a confirmação
+                elementos.confirmacaoPix.style.display = 'none';
+                
+                // Reabre o modal de recarga
+                var modalRecarga = new bootstrap.Modal(document.getElementById('modalRecarga'));
+                modalRecarga.show();
+            });
+
+            // Cartão
+            elementos.formCartao.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const valor = parseFloat(elementos.valorCartao.value);
+                if (isNaN(valor) || valor <= 0) {
+                    mostrarToast("Valor inválido!", "danger");
+                    return;
+                }
+
+                // Atualiza saldo e histórico
+                saldoAtual += valor;
+                historico.unshift({
+                    data: formatarData(),
+                    descricao: "Recarga via Cartão",
+                    valor: valor,
+                    tipo: "entrada"
+                });
+
+                mostrarToast(`Cartão processado! R$ ${valor.toFixed(2).replace('.', ',')} creditados.`, "success");
+                atualizarInterface();
+                
+                // Fecha o modal
+                bootstrap.Modal.getInstance(document.getElementById('modalRecarga')).hide();
+                
+                // Limpa o formulário
+                elementos.formCartao.reset();
+            });
+
+            // Transferência
+            elementos.btnTransferir.addEventListener('click', () => {
+                const matricula = document.getElementById('matriculaDestino').value;
+                const valor = parseFloat(document.getElementById('valorTransferencia').value);
+                
+                // Validações
+                if (!/^\d{8}$/.test(matricula)) {
+                    mostrarToast("Matrícula deve ter 8 dígitos!", "danger");
+                    return;
+                }
+                
+                if (isNaN(valor) || valor <= 0) {
+                    mostrarToast("Valor inválido!", "danger");
+                    return;
+                }
+                
+                if (valor > saldoAtual) {
+                    mostrarToast("Saldo insuficiente!", "danger");
+                    return;
+                }
+
+                // Atualiza saldo e histórico
+                saldoAtual -= valor;
+                historico.unshift({
+                    data: formatarData(),
+                    descricao: `Transferência para ${matricula}`,
+                    valor: valor,
+                    tipo: "saida"
+                });
+
+                mostrarToast(`Transferência de R$ ${valor.toFixed(2).replace('.', ',')} realizada!`, "success");
+                atualizarInterface();
+                
+                // Fecha o modal e limpa campos
+                bootstrap.Modal.getInstance(document.getElementById('modalTransferir')).hide();
+                document.getElementById('matriculaDestino').value = "";
+                document.getElementById('valorTransferencia').value = "";
+            });
+
+            // Ticket (QR Code)
+            document.getElementById('modalTicket').addEventListener('shown.bs.modal', function() {
+                const qrCodeDiv = document.getElementById('qrCode');
+                qrCodeDiv.innerHTML = '';
+                
+                // Gera um código único para o ticket
+                const codigoTicket = `TKT-${Date.now()}`;
+                
+                new QRCode(qrCodeDiv, {
+                    text: codigoTicket,
+                    width: 180,
+                    height: 180,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff"
+                });
+                
+                // Adiciona ao histórico se tiver saldo
+                const valorTicket = 2.50;
+                if (saldoAtual >= valorTicket) {
+                    saldoAtual -= valorTicket;
+                    historico.unshift({
+                        data: formatarData(),
+                        descricao: "Ticket de refeição",
+                        valor: valorTicket,
+                        tipo: "saida"
+                    });
+                    atualizarInterface();
+                } else {
+                    mostrarToast(`Saldo insuficiente! O ticket custa R$ ${valorTicket.toFixed(2).replace('.', ',')}`, "danger");
+                }
+            });
+
+            // Inicialização
+            atualizarInterface();
+            atualizarDataHora();
+            setInterval(atualizarDataHora, 1000);
+        });
+    </script>
+</body>
+</html>
